@@ -1,0 +1,23 @@
+#include <iostream>
+using namespace std;
+
+string warnaLampu(int t) { // fungsi untuk menentukan warna lampu pada detik t
+    int siklus = 103;          // total durasi siklus (20+3+80)
+    int mulai = 45;           // siklus baru mulai dari kuning di detik ke-45
+    int relatif = (t - mulai) % siklus; // hitung waktu relatif dalam siklus
+    if (relatif < 0) relatif += siklus; // agar tetap positif
+
+    if (relatif < 3) return "Kuning";
+    if (relatif < 23) return "Hijau";
+    return "Merah";
+}
+
+int main() {
+    int t;
+    cout << "Masukkan detik: ";
+    cin >> t;
+
+    cout << "Pada detik " << t << ", lampu = " << warnaLampu(t) << endl; // menunjukkan warna lampu pada tiap detiknya
+    
+    return 0;
+}
