@@ -1,0 +1,100 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+// fungsi reverse (buatan sendiri) untuk membalik string
+string myReverse(const string &s) {
+    string t = s; // buat salinan string
+    int n = (int)t.size(); // ambil panjang string
+    for (int i = 0; i < n/2; ++i) { // tukar karakter depan dengan belakang sampai setengah panjang
+        char tmp = t[i];
+        t[i] = t[n-1-i];
+        t[n-1-i] = tmp;
+    }
+    return t; // mengembalikan string yang sudah dibalik
+}
+
+// fungsi untuk ngecek huruf vokal 
+bool isVowel(char c) { // cek apakah c huruf vokal? (a,i,u,e,o)
+    char lc = (c >= 'A' && c <= 'Z') ? (c - 'A' + 'a') : c; // Kalau huruf besar diubah jadi kecil, kalau udah kecil, biarin
+    return (lc=='a' || lc=='e' || lc=='i' || lc=='o' || lc=='u'); // cek apakah salah satu dari a,i,u,e,o
+}
+
+// ENCODE
+string encodeMachine(const string &word) {
+    if (word.empty()) return ""; // kalo string kosong langsung return kosong
+
+    // 1. ambil ASCII dari huruf pertama, simpan sebagai int ke asciiCode
+    char firstChar = word[0]; 
+    int asciiCode = (int)firstChar;
+
+    // 2. hapus vokal
+    string consonants;
+    for (char c : word) {
+        if (!isVowel(c)) consonants.push_back(c); // loop semua huruf, kalo bukan vokal masukin ke consonants
+    }
+
+    // 3. balik string konsonan pakai myReverse
+    string rev = myReverse(consonants);
+
+    // 4. ubah ascii ke string dan sisipkan di tengah
+    string asciiStr = to_string(asciiCode);
+    int mid = (int)rev.size() / 2;
+    string result = rev.substr(0, mid) + asciiStr + rev.substr(mid);
+
+    return result;
+}
+
+// DECODE (hanya kerangka konsonan aja, gabisa decode TT)
+bool decodePartial(const string &cipher, int &outAscii, char &outFirstChar, string &outSkeleton) {
+    int n = (int)cipher.size();
+    if (n == 0) return false;
+
+    // cari posisi digit
+    int i = 0;
+    while (i < n && !(cipher[i] >= '0' && cipher[i] <= '9')) ++i;
+    if (i == n) return false;
+
+    int j = i;
+    while (j < n && (cipher[j] >= '0' && cipher[j] <= '9')) ++j;
+
+    // ambil digit
+    string digits = cipher.substr(i, j - i);
+    outAscii = stoi(digits);
+    outFirstChar = (char)outAscii;
+
+    // hapus digit, balik sisanya
+    string withoutDigits = cipher.substr(0, i) + cipher.substr(j);
+    outSkeleton = myReverse(withoutDigits);
+
+    return true;
+}
+
+int main() {
+    cout << "Mesin Misterius\n";
+    cout << "1. Encode\n2. Decode\nPilihan (masukkan angka saja): ";
+    int mode; cin >> mode;
+    cin.ignore();
+
+    if (mode == 1) {
+        string kata;
+        cout << "Masukkan kata: ";
+        getline(cin, kata);
+        cout << "Sandi = " << encodeMachine(kata) << "\n";
+    }
+    else if (mode == 2) {
+        string sandi;
+        cout << "Masukkan sandi: ";
+        getline(cin, sandi);
+        int asciiVal; char firstChar; string skeleton;
+        if (decodePartial(sandi, asciiVal, firstChar, skeleton)) {
+            cout << "Kode ASCII = " << asciiVal << "\n";
+            cout << "Huruf pertama = " << firstChar << "\n";
+            cout << "Kerangka konsonan = " << skeleton << "\n";
+
+        } else {
+            cout << "Sandi tidak valid.\n";
+        }
+    }
+    return 0;
+}
